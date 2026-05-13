@@ -1,34 +1,45 @@
 #!/bin/bash
 
-# Descobre o caminho absoluto de onde este script está guardado
+# Localiza onde o script está guardado (Independente de SO)
 SOURCE_BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Define as origens
 SRC_PROMPTS="$SOURCE_BASE_DIR/.pi/prompts"
 SRC_MEMORY="$SOURCE_BASE_DIR/.specify/memory"
 SRC_TEMPLATES="$SOURCE_BASE_DIR/.specify/templates"
 
-# Define os destinos (onde você está rodando o script)
 DEST_PI=".pi/prompts"
 DEST_SPECIFY=".specify"
 
-echo "📦 Vinculando Speckit a partir de: $SOURCE_BASE_DIR"
+# Deteta o Sistema Operativo
+OS_TYPE="$(uname)"
 
-# 1. Garante que as pastas de destino existem
-mkdir -p "$DEST_PI"
-mkdir -p "$DEST_SPECIFY"
+echo "📦 Sistema detetado: $OS_TYPE"
+mkdir -p "$DEST_PI" "$DEST_SPECIFY"
 
-# 2. Link simbólico dos Prompts (Um por um para garantir)
-echo "🔗 Vinculando comandos (.pi/prompts)..."
-for file in "$SRC_PROMPTS"/*.md; do
-    filename=$(basename "$file")
-    ln -sf "$file" "$DEST_PI/$filename"
-done
+if [[ "$OS_TYPE" == "Linux" || "$OS_TYPE" == "Darwin" ]]; then
+    # --- FLUXO UNIX (Mac e Linux) ---
+    echo "🔗 A criar links simbólicos Unix..."
+    
+    for file in "$SRC_PROMPTS"/*.md; do
+        ln -sf "$file" "$DEST_PI/$(basename "$file")"
+    done
+    
+    ln -sfn "$SRC_MEMORY" "$DEST_SPECIFY/memory"
+    ln -sfn "$SRC_TEMPLATES" "$DEST_SPECIFY/templates"
 
-# 3. Link simbólico das subpastas da .specify (Memory e Templates)
-# No macOS, usamos -sfn para forçar o link de diretórios
-echo "⚖️ Vinculando governança (.specify)..."
-ln -sfn "$SRC_MEMORY" "$DEST_SPECIFY/memory"
-ln -sfn "$SRC_TEMPLATES" "$DEST_SPECIFY/templates"
+elif [[ "$OS_TYPE" == *"MINGW"* || "$OS_TYPE" == *"MSYS"* ]]; then
+    # --- FLUXO WINDOWS (Git Bash) ---
+    echo "🪟 A criar links simbólicos Windows..."
+    
+    for file in "$SRC_PROMPTS"/*.md; do
+        # O Windows precisa de caminhos específicos para o mklink
+        win_src=$(cygpath -w "$file")
+        win_dest=$(cygpath -w "$DEST_PI/$(basename "$file")")
+        cmd //c "mklink \"$win_dest\" \"$win_src\""
+    done
+    
+    cmd //c "mklink /D \"$(cygpath -w "$DEST_SPECIFY/memory")\" \"$(cygpath -w "$SRC_MEMORY")\""
+    cmd //c "mklink /D \"$(cygpath -w "$DEST_SPECIFY/templates")\" \"$(cygpath -w "$SRC_TEMPLATES")\""
+fi
 
-echo "🚀 Speckit injetado com sucesso no projeto!"
+echo "🚀 Speckit injetado com sucesso!"
