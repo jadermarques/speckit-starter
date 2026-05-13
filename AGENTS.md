@@ -1,10 +1,11 @@
 # AGENTS.md
 
 ## DIRETRIZES DE GOVERNANÇA
-1. Você deve operar em conformidade total com as leis descritas em `constitution.md`.
-2. Antes de qualquer `/plan`, verifique se a solução proposta respeita as ADRs (Architectural Decision Records) da Constituição.
 
-3. Em caso de conflito entre uma sugestão de código e a Constituição, a Constituição prevalece.
+1. "Você está operando em um projeto baseado no Speckit-Starter. Use os prompts em .pi/prompts/ para todas as tarefas de SDD."
+2. Você deve operar em conformidade total com as leis descritas em `constitution.md`.
+3. Antes de qualquer `/plan`, verifique se a solução proposta respeita as ADRs (Architectural Decision Records) da Constituição.
+4. Em caso de conflito entre uma sugestão de código e a Constituição, a Constituição prevalece.
 
 
 
