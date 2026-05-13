@@ -42,4 +42,19 @@ elif [[ "$OS_TYPE" == *"MINGW"* || "$OS_TYPE" == *"MSYS"* ]]; then
     cmd //c "mklink /D \"$(cygpath -w "$DEST_SPECIFY/templates")\" \"$(cygpath -w "$SRC_TEMPLATES")\""
 fi
 
-echo "🚀 Speckit injetado com sucesso!"
+
+# ... (início do script igual)
+
+# 1. HARD LINKS para os Prompts (Arquivos)
+# Hard links fazem o arquivo parecer real para o Pi Agent
+for file in "$SRC_PROMPTS"/*.md; do
+    filename=$(basename "$file")
+    rm -f "$DEST_PI/$filename" # Remove o link antigo se existir
+    ln "$file" "$DEST_PI/$filename"
+done
+
+# 2. Links Simbólicos para as Pastas (Diretórios não aceitam Hard Links)
+ln -sfn "$SRC_MEMORY" "$DEST_SPECIFY/memory"
+ln -sfn "$SRC_TEMPLATES" "$DEST_SPECIFY/templates"
+
+echo "🚀 Speckit injetado com Hard Links! (Compatibilidade máxima)"
